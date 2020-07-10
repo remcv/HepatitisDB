@@ -16,6 +16,10 @@ public class Main
         DataSource ds = DataSource.getInstance();
         ds.openConnection();
 
+        // create tables (if not exists)
+        ds.createTablePatients();
+        ds.createTableVisits();
+
         // print main menu
         PrintInfo.printMainMenu();
         System.out.print("\nEnter a choice >> ");
@@ -25,16 +29,20 @@ public class Main
         {
             switch (userInput)
             {
-                // create a table
                 case "1":
-                    MainController.createTable(ds);
+                    MainController.printPatientsTable();
                     break;
-                // delete a table
                 case "2":
-                    MainController.deleteTable(ds);
+                    MainController.printVisitsTable();
                     break;
                 case "3":
-                    // enter code here
+                    MainController.addAPatientInfo();
+                    break;
+                case "4":
+                    MainController.addAVisit();
+                    break;
+                case "5":
+                    MainController.updateAPatientInfo();
                     break;
                 case "6":
                     PrintInfo.printMainMenu();

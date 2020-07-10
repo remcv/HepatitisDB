@@ -4,17 +4,16 @@ public class PatientInfo
 {
     // fields
     private int id;
-    private String nameCode;
+    private String codename;
     private int age;
     private char gender;
-    private String lot_CnC;
-    private String lot_CirrhosisDivisions;
+
 
     // constructor
-    public PatientInfo(int id, String nameCode, int age, char gender)
+    public PatientInfo(int id, String codename, int age, char gender)
     {
         this.id = id;
-        this.nameCode = nameCode;
+        this.codename = codename;
         this.age = age;
         this.gender = gender;
     }
@@ -30,14 +29,14 @@ public class PatientInfo
         this.id = id;
     }
 
-    public String getNameCode()
+    public String getCodename()
     {
-        return nameCode;
+        return codename;
     }
 
-    public void setNameCode(String nameCode)
+    public void setCodename(String codename)
     {
-        this.nameCode = nameCode;
+        this.codename = codename;
     }
 
     public int getAge()
@@ -60,30 +59,10 @@ public class PatientInfo
         this.gender = gender;
     }
 
-    public String getLot_CnC()
-    {
-        return lot_CnC;
-    }
-
-    public void setLot_CnC(String lot_CnC)
-    {
-        this.lot_CnC = lot_CnC;
-    }
-
-    public String getLot_CirrhosisDivisions()
-    {
-        return lot_CirrhosisDivisions;
-    }
-
-    public void setLot_CirrhosisDivisions(String lot_CirrhosisDivisions)
-    {
-        this.lot_CirrhosisDivisions = lot_CirrhosisDivisions;
-    }
-
     // methods - toString()
     @Override
     public String toString()
     {
-        return id + " " + nameCode + " | age: " + age + " | gender: " + gender;
+        return id + " | codename: " + codename + " | age: " + age + " | gender: " + gender;
     }
 }

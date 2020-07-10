@@ -5,18 +5,19 @@ public class MarkersAtAnEvaluation
     // fields
     private int id;
     private int patient_id;
-    private Evaluation eval;
+    private String visit;
     private double apri;
     private double fib4;
-    private FibroTest fibroTest_categ;
+    private String fibroTest_categ;
     private double fibroTest_score;
 
     // constructor
-    public MarkersAtAnEvaluation(int id, int patient_id, Evaluation eval, double apri, double fib4, FibroTest fibroTest_categ, double fibroTest_score)
+    public MarkersAtAnEvaluation(int id, int patient_id, String visit, double apri, double fib4,
+                                 String fibroTest_categ, double fibroTest_score)
     {
         this.id = id;
         this.patient_id = patient_id;
-        this.eval = eval;
+        this.visit = visit;
         this.apri = apri;
         this.fib4 = fib4;
         this.fibroTest_categ = fibroTest_categ;
@@ -44,14 +45,14 @@ public class MarkersAtAnEvaluation
         this.patient_id = patient_id;
     }
 
-    public Evaluation getEval()
+    public String getVisit()
     {
-        return eval;
+        return visit;
     }
 
-    public void setEval(Evaluation eval)
+    public void setVisit(String visit)
     {
-        this.eval = eval;
+        this.visit = visit;
     }
 
     public double getApri()
@@ -74,12 +75,12 @@ public class MarkersAtAnEvaluation
         this.fib4 = fib4;
     }
 
-    public FibroTest getFibroTest_categ()
+    public String getFibroTest_categ()
     {
         return fibroTest_categ;
     }
 
-    public void setFibroTest_categ(FibroTest fibroTest_categ)
+    public void setFibroTest_categ(String fibroTest_categ)
     {
         this.fibroTest_categ = fibroTest_categ;
     }
@@ -98,7 +99,8 @@ public class MarkersAtAnEvaluation
     @Override
     public String toString()
     {
-        return id + " | patient_id: " + patient_id + " | evaluation: " + eval.toString() +
-                "\napri: " + apri + " | fib4: " + fib4 + " | fibroTest_categ: " + fibroTest_categ.toString() + " | fibroTest_score: " + fibroTest_score;
+        return id + " | patient_id: " + patient_id + " | visit: " + visit +
+                " | apri: " + apri + " | fib4: " + fib4 + " | fibroTest_categ: " +
+                fibroTest_categ + " | fibroTest_score: " + fibroTest_score;
     }
 }

@@ -1,12 +1,14 @@
 package remcv.com.github.controller;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import remcv.com.github.model.MarkersAtAnEvaluation;
+import remcv.com.github.model.PatientInfo;
+import remcv.com.github.model.TableConstants;
+
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
-public class DataSource
+public class DataSource implements TableConstants
 {
     // fields
     private static final String DATABASE_NAME = "hepatitis.db";
@@ -59,17 +61,15 @@ public class DataSource
     }
 
     // methods - create & delete tables
-    public void createTable(String tableName, List<String> colNamesAndTypes)
+    public void createTablePatients()
     {
+        // CREATE TABLE IF NOT EXISTS patients_info (id INTEGER PRIMARY KEY, codename TEXT, age INTEGER, gender TEXT)
         StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
-        sb.append(tableName);
+        sb.append(TableConstants.TABLE_PATIENTS_INFO);
         sb.append(" (id INTEGER PRIMARY KEY, ");
-        for (int i = 0; i < colNamesAndTypes.size(); i += 2)
-        {
-            sb.append(colNamesAndTypes.get(i) + " " + colNamesAndTypes.get(i+1) + ",");
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append(")");
+        sb.append(TableConstants.PATIENTS_COLUMN_CODENAME + " TEXT, ");
+        sb.append(TableConstants.PATIENTS_COLUMN_AGE + " INTEGER, ");
+        sb.append(TableConstants.PATIENTS_COLUMN_GENDER + " TEXT)");
 
         try (Statement statement = conn.createStatement())
         {
@@ -77,41 +77,282 @@ public class DataSource
         }
         catch (SQLException e)
         {
-            System.out.println("createTable() failed " + tableName);
+            System.out.println("createTable() failed " + TableConstants.TABLE_PATIENTS_INFO);
             e.printStackTrace();
         }
     }
 
-    public void deleteTable(String tableName)
+    public void createTableVisits()
     {
-        String deleteStatementString = "DROP TABLE " + tableName;
-        Statement deleteStm = null;
+        // CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY, patient_id INTEGER, visit TEXT, apri REAL, fib4 REAL, fibroTest_score REAL, fibroTest_categ TEXT)
+        String stmString = String.format("CREATE TABLE IF NOT EXISTS %1$s (id INTEGER PRIMARY KEY, %2$s INTEGER, %3$s TEXT, %4$s REAL, %5$s REAL, %6$s REAL, %7$s TEXT)",
+                TableConstants.TABLE_VISITS,                    // 1
+                TableConstants.VISITS_COLUMN_PATIENT_ID,        // 2
+                TableConstants.VISITS_COLUMN_VISIT,             // 3
+                TableConstants.VISITS_COLUMN_APRI,              // 4
+                TableConstants.VISITS_COLUMN_FIB4,              // 5
+                TableConstants.VISITS_COLUMN_FIBROTEST_SCORE,   // 6
+                TableConstants.VISITS_COLUMN_FIBROTEST_CATEG);  // 7
 
-        try
+        try (Statement statement = conn.createStatement())
         {
-           deleteStm = conn.createStatement();
+            statement.execute(stmString);
+        }
+        catch (SQLException e)
+        {
+            System.out.println("createTable() failed " + TableConstants.TABLE_PATIENTS_INFO);
+            e.printStackTrace();
+        }
+    }
+
+    // methods - query data
+    public List<PatientInfo> getListOfPatients()
+    {
+        String queryString = "SELECT * FROM " + TableConstants.TABLE_PATIENTS_INFO + " ORDER BY " + TableConstants.ID;
+
+        try (Statement stm = conn.createStatement())
+        {
+            ResultSet results = stm.executeQuery(queryString);
+            List<PatientInfo> patientList = new ArrayList<>();
+
+            while (results.next())
+            {
+                int id = results.getInt(TableConstants.ID);
+                String codename = results.getString(TableConstants.PATIENTS_COLUMN_CODENAME);
+                int age = results.getInt(TableConstants.PATIENTS_COLUMN_AGE);
+                char gender = results.getString(TableConstants.PATIENTS_COLUMN_GENDER).charAt(0);
+
+                patientList.add(new PatientInfo(id, codename, age, gender));
+            }
+
+            return patientList;
         }
         catch (SQLException e)
         {
             e.printStackTrace();
+            return null;
         }
+    }
 
-        try
+    public List<MarkersAtAnEvaluation> getListOfMarkers()
+    {
+        String queryString = "SELECT * FROM " + TableConstants.TABLE_VISITS + " ORDER BY " + TableConstants.ID;
+
+        try (Statement stm = conn.createStatement())
         {
-            deleteStm.execute(deleteStatementString);
+            ResultSet results = stm.executeQuery(queryString);
+            List<MarkersAtAnEvaluation> visitsList = new ArrayList<>();
+
+            while (results.next())
+            {
+                int id = results.getInt(TableConstants.ID);
+                int patient_id = results.getInt(TableConstants.VISITS_COLUMN_PATIENT_ID);
+                String visit = results.getString(TableConstants.VISITS_COLUMN_VISIT);
+                double apri = results.getDouble(TableConstants.VISITS_COLUMN_APRI);
+                double fib4 = results.getDouble(TableConstants.VISITS_COLUMN_FIB4);
+                String fibroTest_categ = results.getString(TableConstants.VISITS_COLUMN_FIBROTEST_CATEG);
+                double fibroTest_score = results.getDouble(TableConstants.VISITS_COLUMN_FIBROTEST_SCORE);
+
+                visitsList.add(new MarkersAtAnEvaluation(id, patient_id, visit, apri, fib4, fibroTest_categ, fibroTest_score));
+            }
+
+            return visitsList;
         }
-        catch (SQLException e)
-        {
-            System.out.println("\t" + tableName + " is an invalid table name");
-        }
-        
-        try
-        {
-            deleteStm.close();
-        } 
         catch (SQLException e)
         {
             e.printStackTrace();
+            return null;
+        }
+    }
+
+    // methods - insert rows
+    public void addAPatientInfo(String codename, int age, String gender)
+    {
+        // INSERT INTO patients_info (codename, age, gender) VALUES ("AN", 33, 'F')
+        String stmString = String.format("INSERT INTO patients_info (%1$s, %2$s, %3$s) VALUES (?, ?, ?)",
+                TableConstants.PATIENTS_COLUMN_CODENAME,
+                TableConstants.PATIENTS_COLUMN_AGE,
+                TableConstants.PATIENTS_COLUMN_GENDER);
+
+        PreparedStatement pStm = null;
+
+        try
+        {
+            pStm = conn.prepareStatement(stmString);
+            pStm.setString(1, codename);
+            pStm.setInt(2, age);
+            pStm.setString(3, gender);
+
+            int addNumber = pStm.executeUpdate();
+            if (addNumber == 1)
+            {
+                System.out.println("\tAdd operation was successful");
+            }
+        }
+        catch (SQLException e)
+        {
+            System.out.println("\tAdd operation failed");
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (pStm != null)
+            {
+                try
+                {
+                    pStm.close();
+                }
+                catch (SQLException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void addAVisit(int patient_id, String visit, double apri, double fib4, String fibroTest_categ, double fibroTest_score)
+    {
+        // INSERT INTO visits (int patient_id, String visit, double apri, double fib4, String fibroTest_categ, double fibroTest_score) VALUES (......)
+        String stmString = String.format("INSERT INTO %7$s (%1$s, %2$s, %3$s, %4$s, %5$s, %6$s) VALUES (?, ?, ?, ?, ?, ?)",
+                TableConstants.VISITS_COLUMN_PATIENT_ID,
+                TableConstants.VISITS_COLUMN_VISIT,
+                TableConstants.VISITS_COLUMN_APRI,
+                TableConstants.VISITS_COLUMN_FIB4,
+                TableConstants.VISITS_COLUMN_FIBROTEST_CATEG,
+                TableConstants.VISITS_COLUMN_FIBROTEST_SCORE,
+                TableConstants.TABLE_VISITS);
+
+        PreparedStatement pStm = null;
+
+        try
+        {
+            pStm = conn.prepareStatement(stmString);
+            pStm.setInt(1, patient_id);
+            pStm.setString(2, visit);
+            pStm.setDouble(3, apri);
+            pStm.setDouble(4, fib4);
+            pStm.setString(5, fibroTest_categ);
+            pStm.setDouble(6, fibroTest_score);
+
+            int addNumber = pStm.executeUpdate();
+            if (addNumber == 1)
+            {
+                System.out.println("\tAdd operation was successful");
+            }
+        }
+        catch (SQLException e)
+        {
+            System.out.println("\tAdd operation failed");
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (pStm != null)
+            {
+                try
+                {
+                    pStm.close();
+                }
+                catch (SQLException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    // methods - update rows
+    public void updateAPatientInfo(int idValue, String codename, int age, String gender)
+    {
+        // UPDATE patients_info SET codename = new_value_1, age = new_value_2, gender = new_value_3 WHERE id = id
+        String stmString = String.format("UPDATE patients_info SET %1$s = ?, %2$s = ?, %3$s = ? WHERE %4$s = ?",
+                TableConstants.PATIENTS_COLUMN_CODENAME,
+                TableConstants.PATIENTS_COLUMN_AGE,
+                TableConstants.PATIENTS_COLUMN_GENDER,
+                TableConstants.ID);
+
+        PreparedStatement pStm = null;
+
+        try
+        {
+            pStm = conn.prepareStatement(stmString);
+            pStm.setString(1, codename);
+            pStm.setInt(2, age);
+            pStm.setString(3, gender);
+            pStm.setInt(4, idValue);
+
+            int updateNumber = pStm.executeUpdate();
+            if (updateNumber == 1)
+            {
+                System.out.println("\tUpdate successful");
+            }
+            else
+            {
+                System.out.println("\tUpdate failed - invalid id");
+            }
+        }
+        catch (SQLException e)
+        {
+            System.out.println("\tUpdate failed");
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (pStm != null)
+            {
+                try
+                {
+                    pStm.close();
+                }
+                catch (SQLException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    // methods - delete rows
+    public void deleteAPatientInfo(int idValue)
+    {
+        // DELETE FROM patients_info WHERE id = idValue
+        String stmString = String.format("DELETE FROM patients_info WHERE %s = ?", TableConstants.ID);
+
+        PreparedStatement pStm = null;
+
+        try
+        {
+            pStm = conn.prepareStatement(stmString);
+            pStm.setInt(1, idValue);
+
+            int deleteNumber = pStm.executeUpdate();
+            if (deleteNumber == 1)
+            {
+                System.out.println("\tDelete operation was successful");
+            }
+            else
+            {
+                System.out.println("\tDelete failed - invalid id");
+            }
+        }
+        catch (SQLException e)
+        {
+            System.out.println("\tDelete failed");
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (pStm != null)
+            {
+                try
+                {
+                    pStm.close();
+                }
+                catch (SQLException e)
+                {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
