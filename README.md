@@ -8,3 +8,6 @@ The underlying database consists of an SQLite with two tables:
 
 ## Programming / Java concepts used
 SQLite, JDBC, singleton pattern, exceptions, MVC, CRUD
+
+## Future plans
+Add a UI in JavaFX or Android
