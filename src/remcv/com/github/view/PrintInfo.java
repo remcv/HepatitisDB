@@ -17,6 +17,7 @@ public final class PrintInfo
                 "\t- 6 - update a record from the visits table\n" +
                 "\t- 7 - delete a record from the patients_info table\n" +
                 "\t- 8 - delete a record from the visits table\n" +
+                "\t- 9 - obtain info about the visits of one patient\n" +
                 "\t- exit to close the program");
     }
 

@@ -53,6 +53,9 @@ public class Main
                 case "8":
                     MainController.deleteAVisit();
                     break;
+                case "9":
+                    MainController.getOnePatientInfoAndVisits();
+                    break;
                 default:
                     System.out.println("\tInvalid user input. Try again!");
             }

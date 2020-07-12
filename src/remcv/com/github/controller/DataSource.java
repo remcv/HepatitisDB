@@ -1,5 +1,6 @@
 package remcv.com.github.controller;
 
+import remcv.com.github.model.InfoAndVisitsOfAPatient;
 import remcv.com.github.model.MarkersAtAnEvaluation;
 import remcv.com.github.model.PatientInfo;
 import remcv.com.github.model.TableConstants;
@@ -163,6 +164,73 @@ public class DataSource implements TableConstants
             e.printStackTrace();
             return null;
         }
+    }
+
+    public List<InfoAndVisitsOfAPatient> getOnePatientInfoAndVisits(int patientId)
+    {
+        /*
+         * SELECT pi.id, pi.codename, pi.age, pi.gender, v.visit, v.apri, v.fib4, v.fibroTest_categ, v.fibroTest_score
+         * FROM patients_info pi
+         * INNER JOIN visits v
+         * ON pi.id = v.patient_id
+         * WHERE pi.id = 1
+        */
+
+        String queryString = String.format("SELECT %1$s.%2$s, %1$s.%3$s, %1$s.%4$s, %1$s.%5$s, %6$s.%7$s, %6$s.%8$s, %6$s.%9$s, %6$s.%10$s, %6$s.%11$s " +
+                        "FROM %6$s LEFT JOIN %1$s ON %1$s.%2$s = %6$s.%12$s WHERE %1$s.%2$s = %13$d ORDER BY %7$s DESC",
+                TableConstants.TABLE_PATIENTS_INFO,             // 1
+                TableConstants.ID,                              // 2
+                TableConstants.PATIENTS_COLUMN_CODENAME,        // 3
+                TableConstants.PATIENTS_COLUMN_AGE,             // 4
+                TableConstants.PATIENTS_COLUMN_GENDER,          // 5
+                TableConstants.TABLE_VISITS,                    // 6
+                TableConstants.VISITS_COLUMN_VISIT,             // 7
+                TableConstants.VISITS_COLUMN_APRI,              // 8
+                TableConstants.VISITS_COLUMN_FIB4,              // 9
+                TableConstants.VISITS_COLUMN_FIBROTEST_CATEG,   // 10
+                TableConstants.VISITS_COLUMN_FIBROTEST_SCORE,   // 11
+                TableConstants.VISITS_COLUMN_PATIENT_ID,        // 12
+                patientId);                                     // 13
+
+        try (Statement stm = conn.createStatement();
+            ResultSet results = stm.executeQuery(queryString))
+        {
+            int id_of_patient;
+            String codename;
+            int age;
+            String gender;
+            String visit;
+            double apri;
+            double fib4;
+            String fibroTest_categ;
+            double fibroTest_score;
+
+            List<InfoAndVisitsOfAPatient> list = new ArrayList<>();
+
+            while (results.next())
+            {
+                id_of_patient = results.getInt(TableConstants.ID);
+                codename = results.getString(TableConstants.PATIENTS_COLUMN_CODENAME);
+                age = results.getInt(TableConstants.PATIENTS_COLUMN_AGE);
+                gender = results.getString(TableConstants.PATIENTS_COLUMN_GENDER);
+                visit = results.getString(TableConstants.VISITS_COLUMN_VISIT);
+                apri = results.getDouble(TableConstants.VISITS_COLUMN_APRI);
+                fib4 = results.getDouble(TableConstants.VISITS_COLUMN_FIB4);
+                fibroTest_categ = results.getString(TableConstants.VISITS_COLUMN_FIBROTEST_CATEG);
+                fibroTest_score = results.getDouble(TableConstants.VISITS_COLUMN_FIBROTEST_SCORE);
+
+                list.add(new InfoAndVisitsOfAPatient(id_of_patient, codename, age, gender, visit, apri, fib4,
+                        fibroTest_categ, fibroTest_score));
+            }
+
+            return list;
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     // methods - insert rows

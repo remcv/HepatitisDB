@@ -1,5 +1,6 @@
 package remcv.com.github.controller;
 
+import remcv.com.github.model.InfoAndVisitsOfAPatient;
 import remcv.com.github.model.PatientInfo;
 import remcv.com.github.view.PrintInfo;
 
@@ -9,9 +10,6 @@ import java.util.Scanner;
 
 public final class MainController
 {
-    // fields
-    private static final String EXIT_WORD = "exit";
-
     // methods - CRUD for patients_info table
     public static void addAPatientInfo()
     {
@@ -172,5 +170,31 @@ public final class MainController
         int idValue = scanner.nextInt();
 
         DataSource.getInstance().deleteAVisit(idValue);
+    }
+
+    // methods - query data
+    public static void getOnePatientInfoAndVisits()
+    {
+        Scanner scanner = new Scanner(System.in);
+        int idOfPatient;
+
+        System.out.print("\nObtain information about visits from a single patient\n\t- enter patient id >> ");
+        idOfPatient = scanner.nextInt();
+        scanner.nextLine();
+
+        List<InfoAndVisitsOfAPatient> list = DataSource.getInstance().getOnePatientInfoAndVisits(idOfPatient);
+
+        if (list == null)
+        {
+            System.out.println("\tEmpty list");
+        }
+        else if (list.size() == 0)
+        {
+            System.out.println("\tInvalid patient id");
+        }
+        else
+        {
+            PrintInfo.printTable(list);
+        }
     }
 }
