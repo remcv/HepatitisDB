@@ -45,18 +45,25 @@ public class Main
                     MainController.updateAPatientInfo();
                     break;
                 case "6":
-                    PrintInfo.printMainMenu();
+                    MainController.updateAVisit();
+                    break;
+                case "7":
+                    MainController.deleteAPatientInfo();
+                    break;
+                case "8":
+                    MainController.deleteAVisit();
+                    break;
                 default:
-                    System.out.println("Invalid user input. Try again!");
+                    System.out.println("\tInvalid user input. Try again!");
             }
 
             // update loop control variable
             PrintInfo.printMainMenu();
             System.out.print("\nEnter a choice >> ");
             userInput = scanner.nextLine();
-
         }
 
+        // close database connection
         ds.closeConnection();
     }
 }

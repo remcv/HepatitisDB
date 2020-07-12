@@ -312,11 +312,111 @@ public class DataSource implements TableConstants
         }
     }
 
+    public void updateAVisit(int visitId, int patient_id, String visit, double apri, double fib4, String fibroTest_categ, double fibroTest_score)
+    {
+        // UPDATE values SET patient_id = new_value_1, visit = new_value_2 ... WHERE id = visitId
+        String stmString = String.format("UPDATE %1$s SET %2$s = ?, %3$s = ?, %4$s = ?, %5$s = ?, %6$s = ?, %7$s = ? WHERE %8$s = ?",
+                TableConstants.TABLE_VISITS,                    // 1
+                TableConstants.VISITS_COLUMN_PATIENT_ID,        // 2
+                TableConstants.VISITS_COLUMN_VISIT,             // 3
+                TableConstants.VISITS_COLUMN_APRI,              // 4
+                TableConstants.VISITS_COLUMN_FIB4,              // 5
+                TableConstants.VISITS_COLUMN_FIBROTEST_CATEG,   // 6
+                TableConstants.VISITS_COLUMN_FIBROTEST_SCORE,   // 7
+                TableConstants.ID);                             // 8
+
+        PreparedStatement pStm = null;
+
+        try
+        {
+            pStm = conn.prepareStatement(stmString);
+            pStm.setInt(1, patient_id);
+            pStm.setString(2, visit);
+            pStm.setDouble(3, apri);
+            pStm.setDouble(4, fib4);
+            pStm.setString(5, fibroTest_categ);
+            pStm.setDouble(6, fibroTest_score);
+            pStm.setInt(7, visitId);
+
+            int addNumber = pStm.executeUpdate();
+            if (addNumber == 1)
+            {
+                System.out.println("\tUpdate operation was successful");
+            }
+            else
+            {
+                System.out.println("\tUpdate operation failed - invalid visit id");
+            }
+        }
+        catch (SQLException e)
+        {
+            System.out.println("\tUpdate operation failed");
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (pStm != null)
+            {
+                try
+                {
+                    pStm.close();
+                }
+                catch (SQLException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     // methods - delete rows
     public void deleteAPatientInfo(int idValue)
     {
         // DELETE FROM patients_info WHERE id = idValue
         String stmString = String.format("DELETE FROM patients_info WHERE %s = ?", TableConstants.ID);
+
+        PreparedStatement pStm = null;
+
+        try
+        {
+            pStm = conn.prepareStatement(stmString);
+            pStm.setInt(1, idValue);
+
+            int deleteNumber = pStm.executeUpdate();
+            if (deleteNumber == 1)
+            {
+                System.out.println("\tDelete operation was successful");
+            }
+            else
+            {
+                System.out.println("\tDelete failed - invalid id");
+            }
+        }
+        catch (SQLException e)
+        {
+            System.out.println("\tDelete failed");
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (pStm != null)
+            {
+                try
+                {
+                    pStm.close();
+                }
+                catch (SQLException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void deleteAVisit(int idValue)
+    {
+        // DELETE FROM visits WHERE id = idValue
+        String stmString = String.format("DELETE FROM %s WHERE %s = ?", TableConstants.TABLE_VISITS, TableConstants.ID);
 
         PreparedStatement pStm = null;
 
