@@ -1,9 +1,9 @@
 # HepatitisDB
 
-## App logic
+#### App logic
 Simple database CRUD in the console to simulate data from patients with hepatitis C, treated with DAA - the evolution of liver fibrosis at three stages: baseline, 6 months and 1 year after treatment.
 
-## Database info
+#### Database info
 The underlying database consists of an SQLite with two tables (one-to-many relationship):   
 
 ```sql
@@ -26,8 +26,8 @@ CREATE TABLE markers (
 );
 ```
 
-## Programming / Java concepts used
+#### Programming / Java concepts used
 SQLite, JDBC, singleton pattern, exceptions, MVC, CRUD
 
-## Future plans
+#### Future plans
 Add a UI in JavaFX or Android, or change to a web application.
